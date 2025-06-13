@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         protected Void doInBackground(Void... voids) {
             try {
                 // Thay địa chỉ IP của server theo mạng của bạn
-                socket = new Socket("192.168.1.100", 5555);
+                socket = new Socket("10.0.2.2", 5555); // IP kết nối với máy ảo
                 out = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -75,7 +75,14 @@ public class MainActivity extends AppCompatActivity {
     private void sendMessage() {
         String message = edtMessage.getText().toString();
         if (!message.isEmpty() && out != null) {
-            out.println(message);
+            // ✅ Gửi trong background thread để tránh lỗi NetworkOnMainThreadException
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    out.println(message);
+                }
+            }).start();
+
             txtChat.append("\nBạn: " + message);
             edtMessage.setText("");
         }
